@@ -1,4 +1,4 @@
-import Project1V01 as pr
+import functions as pr
 
 #Didn't bother to comment so rigerously for this part as its not relevant to the question
 
