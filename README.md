@@ -1,3 +1,3 @@
 # MATH220_Project001_Dimensionality
 
-Call main() in main.py.
+To begin call main() in main.py
