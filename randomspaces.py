@@ -1,4 +1,4 @@
-import Project1V01 as pr
+import functions as pr
 import random as rd
 
 #we Define a function to generate random spanning vectors
