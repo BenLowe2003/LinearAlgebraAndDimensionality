@@ -14,6 +14,7 @@ M8 = [[3,4]]
 M9 = [[3,4],[5,6],[-6,-8]]
 M10 = [[1,2,3],[4,5,6],[7,8,9]]
 M11 = [[1,2,3],[2,4,7],[1,3,2]]
+M12 = [[1,2],[2,4]]
 
 #We define a function to perform the swap elementry row opertation
 def row_swap(M,p,q):
@@ -33,9 +34,10 @@ def row_addition(M, p, q, f):
     #Temporarily store the rows p and q for saftey
     tempq = M[q]
     tempp = M[p]
+    
     #iterate through the row performing the operation to each of the elements in row p
     for i in range(len(tempp)):
-        tempp[i] = tempp[i] + f* tempq[i]
+        tempp[i] = tempp[i] + f * tempq[i]
     # return the temporary row variables in the matrix
     M[p] = tempp
     M[q] = tempq
@@ -222,21 +224,15 @@ def span_basis(M):
     #we find the number of vectors and the number of coordinates of the space
     num_vectors = len(M)
     num_coordinates = len(M[0])
-    #we first turn the spanning basis into a matrix to find its kernel
-    N = transpose(M)
-    #We find the reduced row eschelon form of the matrix N
-    rref = reduced_row_eschelon(N)
-    #we then find a new basis set by multiplying the rref by the list of vectors (Justify this)
-    B = matrix_product(rref,M)
+    #We find the reduced row eschelon form of the matrix M
+    rref = reduced_row_eschelon(M)
     #we then remove all the zero vectors from the list
-    B = eliminate_zero_rows(B)
-    return B
+    M = eliminate_zero_rows(M)
+    return M
 
 #we define a function to determine the dimension of the basis
 def Dimension(M):
-    #find the transpose of the list of vectors
-    M = transpose(M)
-    #Row reduce the transpose
+    #Row reduce the matrix
     M = reduced_row_eschelon(M)
     #eliminate the zero rows
     M = eliminate_zero_rows(M)
@@ -323,12 +319,14 @@ def input_vectors():
 
 #We define a function to calculate the determinant
 def determinant(M):
+    if len(M) == 0:
+        return 0
     #make sure its a square matrix
     if len(M) != len(M[0]):
-        return None
+        return 0
     #Check if the determinant is 1 by 1
-    if len(M) ==1 and len(M[0]) == 1:
-        return M[0]
+    if len(M) == 1 and len(M[0]) == 1:
+        return M[0][0]
     #Calculate for a 2 by 2 case written explicitly
     if len(M) == 2 and len(M) == 2:
         return M[0][0]*M[1][1] - M[0][1]*M[1][0]  
@@ -342,100 +340,44 @@ def determinant(M):
         det += M[0][c] * ((-1) ** c) * determinant(submatrix)
     return det
 
-#we now define a function to find the rank of a matrix using the minor method.
+
+
 def minor(M):
-    #We first let the rank be equal to 0
+    #find the number of rows in the matrix
+    num_rows = len(M)
+    #begin with the rank at 0
     rank = 0
-    #we then find the rows and columns of the matrix
-    num_rows, num_columns = len(M), len(M[0])
-    #We then iterate through the row by the minimum of the lengths and rows *
-    for i in range(min(num_rows,num_columns)):
-        rank_increase = False
-        #and then find the determinant of the resulting sub matrices iterating through all the possible combinations
-        for j in range(num_columns):
-            #We find the submatrix *
-            minor = [row[:j] + row[j+1:] for row in M[:i] + M[i+1:]]
-            #then find the determinant of the minor matrix
-            det = determinant(minor)
-            #check if the matrix has all linearly independent rows
-            if det != 0 :
-                #this means the rank is increased
-                rank_increase = True
-                #we consider the next element in the column
-                break
-        if rank_increase == True:
-            rank += 1
+    #incearse the size of our minor matrices
+    for size in range(1, num_rows + 1):
+        #iterate through the different shapes of minor matrices
+        for i in range(num_rows - size + 1):
+            for j in range(num_rows - size + 1):
+                #compute the minor
+                minor = [row[j:j+size] for row in M[i:i+size]]
+                #find the determinant
+                det = determinant(minor)
+                #conduct the determinant test for independence
+                if det != 0:
+                    # Update rank based on the size of the minor matrix
+                    rank = size  
+
     return rank
 
 
 
-##
-###we define a function to allow for all the functionality of the program
-##def main():
-##    #we introduce the program and tell the user what it can do
-##    print("Welcome to our project. the following options are available in finding the dimension of a spanning set")
-##    print(" 1 - Elementary row operatios")
-##    print(" 2 - Matrix products")
-##    print(" 3 - Row Reduction")
-##    print(" 4 - Step by step row reduction")
-##    print(" 5 - Finding the a basis of a spanning set")
-##    print(" 6 - Finding  the dimension of a spanning set")
-##    print(" 7 - Exit")
-##    #initialise our check if a valid input is given
-##    selection = None
-##    #check if the input is valid and taking an input for which functionality should be used
-##    while selection not in [1,2,3,4,5,6,7]:
-##        selection = int(input("Choose an options from above, inputting your answer as an integer: "))
-##    if selection == 1:
-##        print("Select an elementary row operation")
-##        print(" 1 - Swap")
-##        print(" 2 - Row addition")
-##        print(" 3 - Scalar row multiplication")
-##        selection = None
-##        while selection not in [1,2,3]:
-##            selection = int(input("Choose an options from above, inputting your answer as an integar: "))
-##        if selection == 1:
-##            print("Input a matrix")
-##            M = input_matrices()
-##            p, q = None, None
-##            while (p not in range(len(M)+1)) and (q not in range(len(M)+1)):
-##                p = int(input("Which row would you like to swap: "))-1
-##                q = int(input("What would you like to swap it with: "))-1
-##            print_matrix(row_swap(M, p, q))
-##        elif selection == 2:
-##            print("Input a matrix")
-##            M = input_matrices()
-##            p, q, multiple = None, None, None
-##            while (p not in range(len(M)+1)) and (p not in range(len(M)+1)) and (multiple != float):
-##                p = int(input("Which row would you like to add too: "))-1
-##                q = int(input("which row would you like to add: "))-1
-##                multiple = float(input("What would you like to multiply row " + q + " with before adding: "))
-##            print_matrix(row_addition(M, p, q, multiple))
-##        else:
-##            print("Input a matrix")
-##            M = input_matrices()
-##            row = None
-##            multiple = None
-##            while (row not in range(len(M)+1) ) and (type(multiple) != float):
-##                row = input("Which row would you like to multiply: ")-1
-##                multiple = input("Which scalar would you like to  multiply by: ")
-##            print_matrix(row_multiplication(M, row, multiple))
-##
-##    elif selection == 6:
-##        print("Input your vectors")
-##        M = input_vectors()
-##        dim = Dimension(M)
-##        print("The dimension of the space spanned by these vectors is " + str(dim) +".")
-##        selection = input("Would you like to know a basis as well (y/n): ")
-##        if selection == "y":
-##            basis = span_basis(M)
-##            print_matrix(basis)
-##    elif selection == 5:
-##        print("Input your vectors")
-##        M = input_vectors()
-##        basis = span_basis(M)
-##        print("A basis of the space spanned by these vectors is :")
-##        print_matrix(basis)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
 

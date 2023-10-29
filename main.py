@@ -4,7 +4,7 @@ import functions as pr
 
 def main():
     #we introduce the program and tell the user what it can do
-    print("Welcome to our project. the following options are available in finding the dimension of a spanning set")
+    print("Welcome to our project. The following options are available in finding the dimension of a spanning set")
     print(" 1 - Elementary row operatios")
     print(" 2 - Matrix products")
     print(" 3 - Row Reduction")
